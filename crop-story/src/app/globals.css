@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Crop Story visual identity.
+  Neutrals carry a green bias so nothing reads as default grey; the accent is a
+  desaturated chlorophyll rather than the usual "eco" green. Indigo is reserved
+  strictly for on-chain state, so a colour never implies verification loosely.
+*/
+:root {
+  --paper: #f6f7f2;
+  --surface: #ffffff;
+  --surface-2: #f0f2e9;
+  --ink: #16190f;
+  --ink-2: #3d4234;
+  --muted: #6e7464;
+  --line: #dcdfd2;
+  --line-2: #c6cbb6;
+  --moss: #4c6b30;
+  --moss-soft: #e9efdd;
+  --chain: #464f96;
+  --chain-soft: #e7e9f7;
+  --soil: #8f581f;
+  --crit: #9d3623;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #111309;
+    --surface: #191c13;
+    --surface-2: #20241a;
+    --ink: #eff1e5;
+    --ink-2: #c5cab5;
+    --muted: #8d947e;
+    --line: #2d3226;
+    --line-2: #414636;
+    --moss: #a3c473;
+    --moss-soft: #222b16;
+    --chain: #9ba5ec;
+    --chain-soft: #1d2038;
+    --soil: #d59c5d;
+    --crit: #e58a74;
+  }
+}
+
+html { color-scheme: light dark; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .card { @apply bg-surface border border-line rounded-md; }
+  .label { @apply block text-[11px] uppercase tracking-[0.1em] text-muted mb-1.5 font-medium; }
+  .input {
+    @apply w-full bg-surface border border-line rounded px-3 py-2.5 text-ink text-[15px]
+           outline-none focus:border-moss focus:ring-2 focus:ring-moss/20;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded px-4 py-2.5 text-[14px]
+           font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary { @apply btn bg-moss text-paper hover:opacity-90; }
+  .btn-ghost { @apply btn border border-line text-ink2 hover:bg-surface2; }
+  .mono { font-family: var(--font-mono); }
+}

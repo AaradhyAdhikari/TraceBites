@@ -1,0 +1,12 @@
+{
+  "name": "Crop Story",
+  "short_name": "Crop Story",
+  "description": "Register a harvest and follow it to the shelf.",
+  "start_url": "/farmer",
+  "display": "standalone",
+  "background_color": "#f6f7f2",
+  "theme_color": "#4c6b30",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
