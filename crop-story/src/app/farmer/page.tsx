@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { batches, cropVarieties, custodyEvents, farms } from "@/db/schema";
@@ -8,8 +7,7 @@ import { rupees, shortDate } from "@/lib/format";
 import { AnchorPill } from "@/components/AnchorPill";
 
 export default async function FarmerHome() {
-  const ctx = await requireFarmer();
-  if (!ctx) redirect("/login");
+  const ctx = (await requireFarmer())!; // layout already redirected if absent
 
   const rows = await db
     .select({
@@ -48,22 +46,14 @@ export default async function FarmerHome() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
-      <header className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.1em] text-muted">{ctx.org.name}</p>
-          <h1 className="text-[26px] font-bold tracking-tight mt-0.5">{ctx.user.displayName}</h1>
-        </div>
-        <Link href="/logout" className="text-[13px] text-muted hover:text-ink pt-1">
-          Sign out
-        </Link>
-      </header>
+      <h1 className="text-[26px] font-bold tracking-tight mb-5">My batches</h1>
 
       <Link href="/farmer/harvest/new" className="btn-primary w-full py-3 mb-7">
         Register a harvest
       </Link>
 
       <h2 className="text-[11px] uppercase tracking-[0.1em] text-muted mb-3">
-        My batches ({rows.length})
+        {rows.length} registered
       </h2>
 
       {rows.length === 0 ? (

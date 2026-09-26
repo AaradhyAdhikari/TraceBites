@@ -22,7 +22,7 @@ export default function Home() {
         <p className="label">Scan a code</p>
         <p className="text-[13.5px] text-muted leading-relaxed">
           Scanning the QR on a package opens its public record — no account, nothing to install. Try{" "}
-          <Link href="/v/RS1234-WH5432-7" className="text-moss underline underline-offset-2">a seeded batch</Link>.
+          <Link href="/v/RS1234-WH5432-T" className="text-moss underline underline-offset-2">a seeded batch</Link>.
         </p>
       </div>
 

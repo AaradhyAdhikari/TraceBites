@@ -43,7 +43,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
         <h1 className="text-[22px] font-bold tracking-tight">That code isn&rsquo;t valid</h1>
         <p className="text-[14.5px] text-muted mt-2 leading-relaxed">
           <span className="mono">{raw}</span> failed its check character, which usually means a typo.
-          Codes look like <span className="mono">RS1234-WH5432-7</span>. Try scanning again rather
+          Codes look like <span className="mono">RS1234-WH5432-T</span>. Try scanning again rather
           than typing it.
         </p>
       </Shell>

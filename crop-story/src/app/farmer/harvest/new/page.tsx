@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
@@ -7,8 +6,7 @@ import { requireFarmer } from "@/lib/session";
 import { HarvestForm } from "@/components/HarvestForm";
 
 export default async function NewHarvestPage() {
-  const ctx = await requireFarmer();
-  if (!ctx) redirect("/login");
+  const ctx = (await requireFarmer())!; // layout already redirected if absent
 
   const [myFarms, crops] = await Promise.all([
     db.select().from(farms).where(eq(farms.orgId, ctx.org.id)).orderBy(asc(farms.name)),
@@ -27,6 +25,18 @@ export default async function NewHarvestPage() {
         afterwards attaches to what you enter here.
       </p>
 
+      {myFarms.length === 0 ? (
+        <div className="card p-5">
+          <p className="text-[15px] font-semibold mb-1">Add a field first</p>
+          <p className="text-[13.5px] text-muted leading-relaxed mb-4">
+            A batch has to come from somewhere, and the field&rsquo;s code becomes part of every
+            batch code registered from it.
+          </p>
+          <Link href="/farmer/fields" className="btn-primary w-full">
+            Add a field
+          </Link>
+        </div>
+      ) : (
       <HarvestForm
         farms={myFarms.map((f) => ({ id: f.id, name: f.name, farmCode: f.farmCode }))}
         crops={crops.map((c) => ({
@@ -37,6 +47,7 @@ export default async function NewHarvestPage() {
           unit: c.defaultUnit,
         }))}
       />
+      )}
     </div>
   );
 }
