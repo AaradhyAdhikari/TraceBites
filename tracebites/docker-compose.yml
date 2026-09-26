@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tracebites-db
+    environment:
+      POSTGRES_USER: tracebites
+      POSTGRES_PASSWORD: tracebites
+      POSTGRES_DB: tracebites
+    ports:
+      - "5433:5432"
+    volumes:
+      - tracebites_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracebites"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  tracebites_pgdata:

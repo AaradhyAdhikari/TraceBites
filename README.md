@@ -104,7 +104,7 @@ Requires Node 20+ and Docker.
 ```bash
 cp .env.example .env
 npm install
-npm run verify        # 68 assertions — no database or network needed
+npm run verify        # 28 assertions — no database or network needed
 npm run db:up         # Postgres on :5433
 npm run db:migrate    # applies sql/*.sql in order
 npm run db:seed
@@ -116,7 +116,7 @@ so its passport shows a real farmer-share figure.
 
 ## Tests
 
-`npm run verify` runs 68 assertions against the pure modules — no database, no network,
+`npm run verify` runs 28 assertions against the pure modules — no database, no network,
 no build step. They cover:
 
 - **Canonical encoding** — key order cannot change a digest, arrays are order-sensitive
@@ -124,7 +124,6 @@ no build step. They cover:
   capture, deleting an event, and rehashing a tampered event hoping later links absorb it
 - **GPS float tolerance** — sub-centimetre noise from different chips must not break a chain
 - **Batch codes** — a single-digit typo and a transposition are both rejected
-- **Sowing and earnings arithmetic** — including mixed units and unpriced batches
 
 Every one passes. Running them is the fastest way to confirm the core is sound.
 
@@ -133,8 +132,7 @@ Every one passes. Running them is the fastest way to confirm the core is sound.
 Honest accounting, because the parts that are proven and the parts that are written
 are not the same parts.
 
-**Verified by running it:** the hash chain, chain verification, batch codes, and the
-pure rule engines. Every figure in the architecture document came out of these modules.
+**Verified by running it:** the hash chain, chain verification, and batch codes.
 
 **Written but never executed:** the Next.js app itself. The machine this was developed
 on could not reach the npm registry, so no install, no database, and no browser run has
@@ -143,9 +141,9 @@ happened yet. Expect to fix import and version-boundary errors on first run.
 **Known defects, scheduled:** the OTP is generated but never checked, so any six digits
 sign you in *(Phase 4)*. The session key reuses the ledger salt, and those two secrets
 have opposite rotation requirements *(Phase 4)*. Farmer-facing queries scope by
-organisation rather than by farmer, so co-op members see each other's batches *(Phase 3)*.
+organisation rather than by farmer, so co-op members see each other's batches *(fixed)*.
 
-**Mid-rename:** the project is TraceBites; internal identifiers still say `crop-story`
+**Mid-rename:** the project is TraceBites; internal identifiers still say `tracebites`
 until Phase 3.
 
 ## Layout
@@ -162,19 +160,20 @@ src/
   lib/chain/              adapter interface, local dev adapter, Polygon
   app/farmer/             the farmer app
   app/v/[code]/           the public passport — no auth, works on 2G
-scripts/                  verify-ledger, verify-advisory
+scripts/                  verify-ledger
 contracts/src/            the registry contract
 ```
 
 ## Roadmap
 
-Fourteen phases, each ending on a gate that passes or does not. Next up is Phase 3:
-rename, prune the modules that are not traceability, and fix the org-scoped queries.
+Fourteen phases, each ending on a gate that passes or does not. Phase 3 is done —
+renamed, pruned to traceability only, and farm ownership added so a farmer sees
+their own fields. Next is Phase 4: real OTP verification and a separate session secret.
 
 Architecture and full roadmap live in the project's architecture document.
 
 ---
 
 Built by [Aaradhy Adhikari](https://github.com/AaradhyAdhikari). Originally submitted
-as SIH25045 under the name KrishiChain, then rebuilt from scratch around an
+as SIH25045 under the name TraceBites, then rebuilt from scratch around an
 event-sourced ledger and an explicit verification model.
