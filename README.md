@@ -93,7 +93,7 @@ Coupling it to the ORM is how hash formats accidentally change.
 | App | Next.js 15, TypeScript, Tailwind | Server components render the passport instantly on a weak connection — the consumer is standing in a shop |
 | Backend | Next.js route handlers | One primary backend. A separate Express server would be a second deployment for no capability gained |
 | Database | PostgreSQL + Drizzle | Keeps SQL visible instead of hiding the query behind an ORM |
-| Auth | Phone OTP, role-scoped sessions | Farmers have phone numbers more reliably than email |
+| Auth | Phone OTP, role-scoped sessions | Farmers have phone numbers more reliably than email. Codes are hashed, peppered, expiring, attempt-limited and single-use |
 | Chain | Polygon Amoy + Solidity | Public, free, and a consumer can verify it |
 | OCR | FastAPI service *(Phase 11)* | The one place Python genuinely wins. No database access, one job |
 
@@ -104,7 +104,7 @@ Requires Node 20+ and Docker.
 ```bash
 cp .env.example .env
 npm install
-npm run verify        # 28 assertions — no database or network needed
+npm run verify        # 68 assertions — no database or network needed
 npm run db:up         # Postgres on :5433
 npm run db:migrate    # applies sql/*.sql in order
 npm run db:seed
@@ -116,7 +116,7 @@ so its passport shows a real farmer-share figure.
 
 ## Tests
 
-`npm run verify` runs 28 assertions against the pure modules — no database, no network,
+`npm run verify` runs 68 assertions against the pure modules — no database, no network,
 no build step. They cover:
 
 - **Canonical encoding** — key order cannot change a digest, arrays are order-sensitive
@@ -124,6 +124,8 @@ no build step. They cover:
   capture, deleting an event, and rehashing a tampered event hoping later links absorb it
 - **GPS float tolerance** — sub-centimetre noise from different chips must not break a chain
 - **Batch codes** — a single-digit typo and a transposition are both rejected
+- **One-time codes** — expiry at the exact boundary, the attempt cap, single use,
+  codes bound to the phone they were issued for, and no message that leaks a code
 
 Every one passes. Running them is the fastest way to confirm the core is sound.
 
@@ -138,10 +140,10 @@ are not the same parts.
 on could not reach the npm registry, so no install, no database, and no browser run has
 happened yet. Expect to fix import and version-boundary errors on first run.
 
-**Known defects, scheduled:** the OTP is generated but never checked, so any six digits
-sign you in *(Phase 4)*. The session key reuses the ledger salt, and those two secrets
-have opposite rotation requirements *(Phase 4)*. Farmer-facing queries scope by
-organisation rather than by farmer, so co-op members see each other's batches *(fixed)*.
+**Known defects:** none outstanding from the earlier list. The OTP is now verified,
+the session key is separate from the ledger salt, and farmer queries scope by owner.
+SMS delivery is still a console line — that is the one remaining seam, and the code
+refuses to run it in production rather than pretending a message was sent.
 
 **Mid-rename:** the project is TraceBites; internal identifiers still say `tracebites`
 until Phase 3.
@@ -160,15 +162,16 @@ src/
   lib/chain/              adapter interface, local dev adapter, Polygon
   app/farmer/             the farmer app
   app/v/[code]/           the public passport — no auth, works on 2G
-scripts/                  verify-ledger
+scripts/                  verify-ledger, verify-otp
 contracts/src/            the registry contract
 ```
 
 ## Roadmap
 
-Fourteen phases, each ending on a gate that passes or does not. Phase 3 is done —
-renamed, pruned to traceability only, and farm ownership added so a farmer sees
-their own fields. Next is Phase 4: real OTP verification and a separate session secret.
+Fourteen phases, each ending on a gate that passes or does not. Phases 3 and 4 are
+done — renamed and pruned to traceability, farm ownership added, and sign-in made
+real. Next is Phase 5: the packhouse, distributor and retailer roles, and custody
+transfer by offer and acceptance.
 
 Architecture and full roadmap live in the project's architecture document.
 

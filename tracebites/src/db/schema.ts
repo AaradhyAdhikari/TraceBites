@@ -14,6 +14,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  date,
   doublePrecision,
   index,
   integer,
@@ -305,6 +306,32 @@ export const ANCHORED_KINDS = [
   "RECALLED",
 ] as const;
 
+/* ------------------------------------------------------------ one-time codes */
+
+/**
+ * Codes are stored hashed and peppered, never in plaintext. A row is spent once
+ * and cannot be replayed; `attempts` caps guessing; `expiresAt` bounds the
+ * window. See lib/otp-core.ts for the rules and scripts/verify-otp.ts for the
+ * tests that hold them in place.
+ */
+export const otpChallenges = pgTable(
+  "otp_challenges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    phone: text("phone").notNull(),
+    codeHash: text("code_hash").notNull(),
+    purpose: text("purpose").notNull().default("signin"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byPhone: index("otp_phone_created_idx").on(t.phone, t.createdAt),
+    window: index("otp_phone_window_idx").on(t.phone, t.createdAt),
+  }),
+);
+
 /* --------------------------------------------------------- chain plumbing */
 
 export const chainAnchors = pgTable("chain_anchors", {
@@ -351,8 +378,23 @@ export const outbox = pgTable(
 
 export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),
+  /**
+   * A document belongs to exactly one of a batch or a farm — enforced by a CHECK
+   * constraint, see sql/0003. Batch documents are per-harvest (a grading sheet, a
+   * lab report). Farm documents are supplied at sign-up and outlive every batch
+   * grown there (an organic certificate, a land record), so revoking one
+   * invalidates the claim everywhere at once instead of in twenty copies.
+   */
   batchId: uuid("batch_id").references(() => batches.id),
+  farmId: uuid("farm_id").references(() => farms.id),
   kind: text("kind").notNull(), // harvest_photo | certificate | lab_report | invoice
+  /** Who issued it. "Certified by" means nothing without a named certifier. */
+  issuer: text("issuer"),
+  /** The certificate's own number, so a consumer can check it at the source. */
+  reference: text("reference"),
+  validFrom: date("valid_from"),
+  /** An expired certificate is not evidence. The passport must be able to say so. */
+  validUntil: date("valid_until"),
   /** Object storage path in production; a data URI in local dev. */
   storagePath: text("storage_path").notNull(),
   mimeType: text("mime_type").notNull(),

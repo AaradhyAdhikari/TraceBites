@@ -223,8 +223,15 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
                 <p className="text-[14.5px] font-semibold">{EVENT_LABEL[e.kind] ?? e.kind}</p>
                 <p className="text-[12.5px] text-muted mt-0.5">{dateTime(e.occurredAt)}</p>
                 {e.lat !== null && e.lng !== null && (
+                  /*
+                   * One decimal place, roughly 11 km. Four decimals is 11 metres,
+                   * which on a public page is the farmer's plot — and their place
+                   * of work — published to anyone who scans a crate. The consumer
+                   * needs to see that the goods moved, not where the farm is.
+                   * Distance below is still computed from full precision.
+                   */
                   <p className="mono text-[11.5px] text-muted mt-0.5">
-                    {e.lat.toFixed(4)}, {e.lng.toFixed(4)}
+                    ≈ {e.lat.toFixed(1)}, {e.lng.toFixed(1)}
                   </p>
                 )}
                 <p className="mono text-[10.5px] text-line2 mt-1.5 break-all">{e.hash}</p>
@@ -236,6 +243,10 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
 
       <footer className="border-t border-line pt-4 mt-2">
         <p className="mono text-[11.5px] text-muted">{batch.code}</p>
+        <p className="text-[12px] text-muted mt-2 leading-relaxed">
+          Locations are shown to about 11 km. The farm&rsquo;s exact plot, its survey number and the
+          farmer&rsquo;s contact details are collected at sign-up but never published here.
+        </p>
         <p className="text-[12px] text-muted mt-2 leading-relaxed">
           TraceBites records what each party said, when they said it, in a form none of them can
           rewrite afterwards. It cannot make a false claim true — an inspector&rsquo;s attestation is

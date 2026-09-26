@@ -2,9 +2,9 @@
  * Sessions.
  *
  * Phone + OTP, because a farmer is far more likely to have a phone number than
- * an email address. In development the OTP is printed to the server console and
- * any six digits are accepted; wiring a real SMS gateway is a Phase 5 task and
- * is deliberately isolated to `sendOtp` below.
+ * an email address. Codes are issued and verified in lib/otp.ts: hashed,
+ * peppered, expiring, attempt-limited and single-use. Only delivery is still
+ * a console line — an SMS gateway is the one remaining seam.
  *
  * The cookie holds a signed { userId, orgId, role } — signed, not encrypted, so
  * it is tamper-evident but never trusted for authorisation on its own: every
@@ -26,8 +26,22 @@ export interface Session {
   role: string;
 }
 
+/**
+ * The session signing key.
+ *
+ * Deliberately NOT the ledger salt. Those two secrets have opposite lifetimes:
+ * LEDGER_SALT can never rotate, because every past event's actor reference was
+ * hashed with it and rotating breaks verification forever. A session key must
+ * rotate the moment it might have leaked. One value cannot do both jobs — using
+ * the salt here meant a suspected session-key leak was unfixable.
+ */
 function secret(): string {
-  return process.env.LEDGER_SALT ?? "dev-only-session-secret";
+  const s = process.env.SESSION_SECRET;
+  if (s) return s;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET is not set — refusing to sign sessions in production");
+  }
+  return "dev-only-session-secret";
 }
 
 function sign(payload: string): string {
@@ -54,16 +68,11 @@ function unseal(raw: string): Session | null {
 
 /* --------------------------------------------------------------- OTP */
 
-export async function sendOtp(phone: string): Promise<void> {
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  // Phase 5 replaces this with an SMS gateway. Until then it goes to the console,
-  // and verifyOtp accepts any six digits — see the note there.
-  console.log(`\n  [dev] OTP for ${phone}: ${code}\n`);
-}
-
-export function isValidOtpShape(code: string): boolean {
-  return /^\d{6}$/.test(code.trim());
-}
+/*
+ * Code issuing and verification now live in lib/otp.ts, backed by
+ * otp-core.ts and its tests. The previous version here generated a code,
+ * printed it, and accepted any six digits.
+ */
 
 /* ----------------------------------------------------------- sessions */
 

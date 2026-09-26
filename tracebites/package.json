@@ -13,7 +13,8 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:reset": "docker compose down -v && docker compose up -d && sleep 3 && npm run db:migrate && npm run db:seed",
     "verify:ledger": "tsx scripts/verify-ledger.ts",
-    "verify": "npm run verify:ledger"
+    "verify": "npm run verify:ledger && npm run verify:otp",
+    "verify:otp": "tsx scripts/verify-otp.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.36.4",
