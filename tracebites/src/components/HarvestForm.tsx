@@ -43,9 +43,10 @@ export function HarvestForm({ farms, crops }: { farms: FarmOption[]; crops: Crop
     if (!("geolocation" in navigator)) return;
     setGeoState("locating");
     navigator.geolocation.getCurrentPosition(
-      (p) =>
-        setGeo({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }) ||
-        setGeoState("ok"),
+      (p) => {
+        setGeo({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy });
+        setGeoState("ok");
+      },
       () => setGeoState("denied"),
       { enableHighAccuracy: true, timeout: 10_000 },
     );

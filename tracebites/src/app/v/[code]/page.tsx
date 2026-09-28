@@ -61,8 +61,11 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
       crop: cropVarieties.commonName,
       shelfLifeDays: cropVarieties.shelfLifeDays,
       farmName: farms.name,
-      district: farms.district,
-      state: farms.state,
+      // District and state belong to the organisation, not the farm row. Showing
+      // the producer company's region is also the right granularity here: the
+      // passport deliberately does not pinpoint the plot.
+      district: organizations.district,
+      state: organizations.state,
       farmLat: farms.lat,
       farmLng: farms.lng,
       certification: farms.certification,
